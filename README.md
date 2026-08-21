@@ -1,1 +1,1 @@
-# dioxius.github.io
+# Hello! Welcome to my portfolio where you can see most of the things I have been able to create and finish! I have many certificates, creations, and works that may make you interested! Let me know if you want to see more or have any questions! You can DM me on Discord (@Dioxius) for anything more!
