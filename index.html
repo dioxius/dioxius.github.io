@@ -1,0 +1,638 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>[Your Name] — Roblox Developer</title>
+<meta name="description" content="Roblox developer specializing in gameplay systems, UI, and physics-based mechanics.">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+
+<style>
+  :root {
+    --bg-deep: #0A1A1F;
+    --bg-panel: #0F242A;
+    --teal: #22D3B8;
+    --teal-dim: #1A7A6B;
+    --pink: #FF6FA0;
+    --gold: #F5C451;
+    --text-bright: #EAF6F3;
+    --text-muted: #7FA19C;
+    --line: rgba(34, 211, 184, 0.16);
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--bg-deep);
+    background-image:
+      radial-gradient(ellipse 80% 50% at 50% -10%, rgba(34,211,184,0.08), transparent),
+      radial-gradient(ellipse 60% 40% at 90% 30%, rgba(255,111,160,0.05), transparent);
+    color: var(--text-bright);
+    font-family: 'Inter', sans-serif;
+    line-height: 1.6;
+    overflow-x: hidden;
+  }
+
+  a { color: inherit; }
+
+  h1, h2, h3, .display {
+    font-family: 'Space Grotesk', sans-serif;
+    letter-spacing: -0.01em;
+  }
+
+  .mono {
+    font-family: 'JetBrains Mono', monospace;
+  }
+
+  ::selection { background: var(--teal); color: var(--bg-deep); }
+
+  /* focus visibility */
+  a:focus-visible, button:focus-visible {
+    outline: 2px solid var(--teal);
+    outline-offset: 3px;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    * { animation: none !important; transition: none !important; }
+  }
+
+  /* ---------- HUD TIMER (signature element) ---------- */
+  .hud {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    z-index: 100;
+    background: rgba(10, 26, 31, 0.85);
+    backdrop-filter: blur(8px);
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    padding: 10px 16px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 13px;
+    color: var(--teal);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    box-shadow: 0 4px 24px rgba(0,0,0,0.3);
+  }
+
+  .hud::before {
+    content: '';
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--pink);
+    animation: pulse 1.6s ease-in-out infinite;
+  }
+
+  @keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.3; }
+  }
+
+  .hud-label {
+    color: var(--text-muted);
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+  }
+
+  @media (max-width: 640px) {
+    .hud { top: auto; bottom: 16px; right: 16px; font-size: 11px; padding: 8px 12px; }
+  }
+
+  /* ---------- LAYOUT ---------- */
+  section {
+    max-width: 920px;
+    margin: 0 auto;
+    padding: 100px 32px;
+  }
+
+  @media (max-width: 640px) {
+    section { padding: 64px 24px; }
+  }
+
+  /* ---------- CHECKPOINT MARKERS ---------- */
+  .checkpoint {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    margin-bottom: 28px;
+  }
+
+  .checkpoint-badge {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--bg-deep);
+    background: var(--teal);
+    padding: 4px 10px;
+    border-radius: 4px;
+    letter-spacing: 0.05em;
+    white-space: nowrap;
+  }
+
+  .checkpoint-line {
+    flex: 1;
+    height: 1px;
+    background: linear-gradient(90deg, var(--line), transparent);
+  }
+
+  .checkpoint-label {
+    color: var(--text-muted);
+    font-size: 13px;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    font-family: 'JetBrains Mono', monospace;
+  }
+
+  /* ---------- HERO ---------- */
+  .hero {
+    min-height: 92vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding-top: 60px;
+    position: relative;
+  }
+
+  .hero-eyebrow {
+    font-family: 'JetBrains Mono', monospace;
+    color: var(--teal);
+    font-size: 13px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    margin-bottom: 20px;
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .hero-eyebrow::before {
+    content: '▸';
+    color: var(--pink);
+  }
+
+  .hero h1 {
+    font-size: clamp(2.6rem, 7vw, 4.6rem);
+    font-weight: 700;
+    line-height: 1.05;
+    margin-bottom: 24px;
+  }
+
+  .hero h1 span {
+    color: var(--teal);
+  }
+
+  .hero p {
+    font-size: 1.15rem;
+    color: var(--text-muted);
+    max-width: 560px;
+    margin-bottom: 40px;
+  }
+
+  .hero-cta {
+    display: flex;
+    gap: 16px;
+    flex-wrap: wrap;
+  }
+
+  .btn {
+    display: inline-block;
+    padding: 14px 28px;
+    border-radius: 6px;
+    font-family: 'Space Grotesk', sans-serif;
+    font-weight: 600;
+    font-size: 0.95rem;
+    text-decoration: none;
+    transition: transform 0.15s ease, box-shadow 0.15s ease;
+  }
+
+  .btn-primary {
+    background: var(--teal);
+    color: var(--bg-deep);
+  }
+
+  .btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px rgba(34,211,184,0.25);
+  }
+
+  .btn-ghost {
+    border: 1px solid var(--line);
+    color: var(--text-bright);
+  }
+
+  .btn-ghost:hover {
+    border-color: var(--teal);
+    transform: translateY(-2px);
+  }
+
+  /* scroll cue */
+  .scroll-cue {
+    position: absolute;
+    bottom: 20px;
+    left: 0;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: var(--text-muted);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .scroll-cue-track {
+    width: 1px;
+    height: 32px;
+    background: var(--line);
+    position: relative;
+    overflow: hidden;
+  }
+
+  .scroll-cue-track::after {
+    content: '';
+    position: absolute;
+    top: -20px;
+    left: 0;
+    width: 100%;
+    height: 20px;
+    background: var(--teal);
+    animation: drip 1.8s ease-in-out infinite;
+  }
+
+  @keyframes drip {
+    0% { top: -20px; }
+    100% { top: 32px; }
+  }
+
+  /* ---------- SECTION HEADINGS ---------- */
+  .section-title {
+    font-size: clamp(1.8rem, 4vw, 2.6rem);
+    font-weight: 700;
+    margin-bottom: 16px;
+  }
+
+  .section-intro {
+    color: var(--text-muted);
+    font-size: 1.05rem;
+    max-width: 620px;
+    margin-bottom: 56px;
+  }
+
+  /* ---------- MEDIA FRAME (placeholder for clips) ---------- */
+  .media-frame {
+    width: 100%;
+    aspect-ratio: 16/9;
+    background: var(--bg-panel);
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--text-muted);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 13px;
+    text-align: center;
+    padding: 20px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .media-frame::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(135deg, rgba(34,211,184,0.06), rgba(255,111,160,0.04));
+  }
+
+  .media-frame span {
+    position: relative;
+    z-index: 1;
+  }
+
+  /* ---------- FEATURE ROWS ---------- */
+  .feature {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 48px;
+    align-items: center;
+    margin-bottom: 96px;
+  }
+
+  .feature:last-child { margin-bottom: 0; }
+
+  .feature.reverse .feature-media { order: 2; }
+  .feature.reverse .feature-copy { order: 1; }
+
+  @media (max-width: 780px) {
+    .feature, .feature.reverse {
+      grid-template-columns: 1fr;
+    }
+    .feature.reverse .feature-media,
+    .feature.reverse .feature-copy {
+      order: initial;
+    }
+  }
+
+  .feature-copy h3 {
+    font-size: 1.5rem;
+    margin-bottom: 14px;
+  }
+
+  .feature-copy p {
+    color: var(--text-muted);
+    margin-bottom: 20px;
+  }
+
+  .tag-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .tag {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    padding: 5px 10px;
+    border-radius: 4px;
+    border: 1px solid var(--line);
+    color: var(--teal);
+    letter-spacing: 0.02em;
+  }
+
+  /* ---------- SYSTEMS LIST ---------- */
+  .systems-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 1px;
+    background: var(--line);
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    overflow: hidden;
+  }
+
+  .system-card {
+    background: var(--bg-panel);
+    padding: 28px 24px;
+  }
+
+  .system-card .num {
+    font-family: 'JetBrains Mono', monospace;
+    color: var(--pink);
+    font-size: 12px;
+    display: block;
+    margin-bottom: 10px;
+  }
+
+  .system-card h4 {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 1.05rem;
+    margin-bottom: 8px;
+  }
+
+  .system-card p {
+    color: var(--text-muted);
+    font-size: 0.92rem;
+  }
+
+  /* ---------- SKILLS ---------- */
+  .skills-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+
+  .skill-pill {
+    padding: 10px 18px;
+    border-radius: 999px;
+    border: 1px solid var(--line);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 13px;
+    color: var(--text-bright);
+    background: var(--bg-panel);
+  }
+
+  /* ---------- CONTACT / FINISH ---------- */
+  .finish {
+    text-align: center;
+    padding-bottom: 140px;
+  }
+
+  .finish h2 {
+    font-size: clamp(2rem, 5vw, 3rem);
+    margin-bottom: 20px;
+  }
+
+  .finish p {
+    color: var(--text-muted);
+    max-width: 480px;
+    margin: 0 auto 40px;
+  }
+
+  .contact-links {
+    display: flex;
+    gap: 16px;
+    justify-content: center;
+    flex-wrap: wrap;
+  }
+
+  footer {
+    text-align: center;
+    padding: 32px;
+    color: var(--text-muted);
+    font-size: 12px;
+    font-family: 'JetBrains Mono', monospace;
+    border-top: 1px solid var(--line);
+  }
+</style>
+</head>
+<body>
+
+  <!-- Signature HUD element: mirrors the in-game speedrun timer HUD -->
+  <div class="hud">
+    <div class="hud-label">RUN</div>
+    <span id="hudTimer" class="mono">00:00.00</span>
+  </div>
+
+  <!-- ============ HERO ============ -->
+  <section class="hero">
+    <div class="hero-eyebrow">Now accepting projects</div>
+    <h1>[Your Name] builds<br><span>Roblox systems</span> that feel finished.</h1>
+    <p>I script gameplay mechanics, UI, and backend systems for Roblox games — with an eye for the polish most solo devs skip. Currently building a full speedrunning obby, solo, from scratch.</p>
+    <div class="hero-cta">
+      <a href="#launch" class="btn btn-primary">See the work</a>
+      <a href="#contact" class="btn btn-ghost">Get in touch</a>
+    </div>
+
+    <div class="scroll-cue">
+      <div class="scroll-cue-track"></div>
+      <span>SCROLL</span>
+    </div>
+  </section>
+
+  <!-- ============ CHECKPOINT 1: LAUNCH MECHANIC ============ -->
+  <section id="launch">
+    <div class="checkpoint">
+      <span class="checkpoint-badge">CP.01</span>
+      <span class="checkpoint-label">Featured Project</span>
+      <div class="checkpoint-line"></div>
+    </div>
+    <h2 class="section-title">A waterfall-themed speedrunning obby</h2>
+    <p class="section-intro">A full obstacle-course game built solo — from physics-based movement mechanics to a custom leaderboard backend. Every clip below is gameplay from the actual project.</p>
+
+    <div class="feature">
+      <div class="feature-media">
+        <div class="media-frame">
+          <span>[ Drop a gameplay clip here:<br>the waterfall launch mechanic in action ]</span>
+        </div>
+      </div>
+      <div class="feature-copy">
+        <h3>Physics-based launch mechanic</h3>
+        <p>Players get propelled between floating islands through a custom projectile-math system — not a BodyVelocity hack. Tuned for a satisfying arc that still feels precise enough to speedrun.</p>
+        <div class="tag-row">
+          <span class="tag">Projectile math</span>
+          <span class="tag">Custom physics</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="feature reverse">
+      <div class="feature-media">
+        <div class="media-frame">
+          <span>[ Drop a gameplay clip here:<br>the live leaderboard + UI ]</span>
+        </div>
+      </div>
+      <div class="feature-copy">
+        <h3>Custom leaderboard & profile UI</h3>
+        <p>Fully programmatic UI — no default Roblox leaderboard. Live run timer, best-time tracking per difficulty, and player profile interactions, all backed by persistent DataStore storage.</p>
+        <div class="tag-row">
+          <span class="tag">DataStore</span>
+          <span class="tag">Custom UI</span>
+          <span class="tag">Live timer</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="feature">
+      <div class="feature-media">
+        <div class="media-frame">
+          <span>[ Drop a gameplay clip here:<br>the loading screen ]</span>
+        </div>
+      </div>
+      <div class="feature-copy">
+        <h3>A loading screen most devs skip</h3>
+        <p>Animated glow, gradient background, ambient rising bubbles, a shimmer progress bar, tip cycling — and music that automatically ducks so the loading track never overlaps in-game audio.</p>
+        <div class="tag-row">
+          <span class="tag">SoundGroup audio</span>
+          <span class="tag">UX polish</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ CHECKPOINT 2: SYSTEMS ============ -->
+  <section id="systems">
+    <div class="checkpoint">
+      <span class="checkpoint-badge">CP.02</span>
+      <span class="checkpoint-label">Under the hood</span>
+      <div class="checkpoint-line"></div>
+    </div>
+    <h2 class="section-title">Five scripts, one modular architecture</h2>
+    <p class="section-intro">The obby runs on a clean separation of concerns — built to be extended, not patched.</p>
+
+    <div class="systems-grid">
+      <div class="system-card">
+        <span class="num">01</span>
+        <h4>DataManager</h4>
+        <p>Per-difficulty personal-best persistence via DataStore.</p>
+      </div>
+      <div class="system-card">
+        <span class="num">02</span>
+        <h4>VotingManager</h4>
+        <p>Lobby voting system across Easy / Medium / Hard difficulty pads.</p>
+      </div>
+      <div class="system-card">
+        <span class="num">03</span>
+        <h4>ObbySpawner</h4>
+        <p>Randomized section spawning using chained Model CFrames.</p>
+      </div>
+      <div class="system-card">
+        <span class="num">04</span>
+        <h4>GameManager</h4>
+        <p>Core round flow, timing, and state management.</p>
+      </div>
+      <div class="system-card">
+        <span class="num">05</span>
+        <h4>UIController</h4>
+        <p>Drives the fully custom banner, timer, and vote-count UI.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ CHECKPOINT 3: SKILLS ============ -->
+  <section id="skills">
+    <div class="checkpoint">
+      <span class="checkpoint-badge">CP.03</span>
+      <span class="checkpoint-label">Toolkit</span>
+      <div class="checkpoint-line"></div>
+    </div>
+    <h2 class="section-title">What I bring to a project</h2>
+    <div class="skills-list">
+      <span class="skill-pill">Lua / Luau scripting</span>
+      <span class="skill-pill">DataStore persistence</span>
+      <span class="skill-pill">PhysicsService</span>
+      <span class="skill-pill">Custom UI (non-default)</span>
+      <span class="skill-pill">Animation controllers</span>
+      <span class="skill-pill">Modular script architecture</span>
+      <span class="skill-pill">Gameplay systems design</span>
+    </div>
+  </section>
+
+  <!-- ============ FINISH: CONTACT ============ -->
+  <section id="contact" class="finish">
+    <div class="checkpoint" style="justify-content: center;">
+      <span class="checkpoint-badge">FINISH</span>
+      <div class="checkpoint-line" style="max-width: 80px;"></div>
+    </div>
+    <h2>Have a Roblox project in mind?</h2>
+    <p>I'm open to freelance work on gameplay systems, UI, and mechanics. Reach out and tell me what you're building.</p>
+    <div class="contact-links">
+      <a href="https://discord.com/users/[your-discord-id]" class="btn btn-primary">Discord: [YourTag]</a>
+      <a href="https://twitter.com/[your-handle]" class="btn btn-ghost">Twitter / X</a>
+      <a href="mailto:[your@email.com]" class="btn btn-ghost">Email</a>
+    </div>
+  </section>
+
+  <footer>
+    Built by [Your Name] &mdash; last updated <span id="footerYear"></span>
+  </footer>
+
+  <script>
+    // Signature HUD run timer — starts counting the moment a visitor lands
+    (function() {
+      const el = document.getElementById('hudTimer');
+      const start = performance.now();
+      function tick() {
+        const elapsed = performance.now() - start;
+        const mins = Math.floor(elapsed / 60000);
+        const secs = Math.floor((elapsed % 60000) / 1000);
+        const ms = Math.floor((elapsed % 1000) / 10);
+        el.textContent =
+          String(mins).padStart(2, '0') + ':' +
+          String(secs).padStart(2, '0') + '.' +
+          String(ms).padStart(2, '0');
+        requestAnimationFrame(tick);
+      }
+      requestAnimationFrame(tick);
+    })();
+
+    document.getElementById('footerYear').textContent = new Date().getFullYear();
+  </script>
+
+</body>
+</html>
