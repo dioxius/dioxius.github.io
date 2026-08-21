@@ -304,6 +304,18 @@
     overflow: hidden;
   }
 
+.feature-media {
+  position: relative;
+}
+
+.feature-media iframe {
+  pointer-events: none;
+}
+
+.feature-media:hover iframe {
+  pointer-events: auto;
+}
+  
   .media-frame::before {
     content: '';
     position: absolute;
